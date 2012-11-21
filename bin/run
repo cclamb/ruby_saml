@@ -2,3 +2,5 @@
 require_relative '../lib/saml/identity_provider'
 require_relative '../lib/saml/service_provider'
 
+ServiceProvider::run!
+IdentityProvider::set port => 5678

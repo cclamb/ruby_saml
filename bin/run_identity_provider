@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require_relative '../lib/saml/identity_provider'
+
+IdentityProvider::set :port => 5678
+IdentityProvider::run!
