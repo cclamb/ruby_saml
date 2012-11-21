@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require_relative '../lib/saml/identity_provider'
+require_relative '../lib/saml/service_provider'
+
