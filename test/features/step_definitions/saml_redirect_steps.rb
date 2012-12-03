@@ -1,58 +1,38 @@
-require_relative '../../../lib/saml/identity_provider'
-require_relative '../../../lib/saml/service_provider'
+require 'net/http'
+require 'uri'
 
-SP_PORT = 5678
-IDP_PORT = 5679
+SP_URL = 'http://localhost:5678/service'
+IDP_URL = 'http://localhost:5679/identify'
 
-def spawn_servers
+state = {
+  :initial_sp_response => nil,
+  :initial_idp_response => nil
+}
 
-  test_state = {:sp_pid => 0, :idp_pid => 0}
-
-  test_state[:sp_pid] = fork do
-    $stdout = StringIO.new
-    $stderr = StringIO.new
-    ServiceProvider::set :port => SP_PORT
-    ServiceProvider::run!
-  end
-
-  test_state[:idp_pid] = fork do
-    $stdout = StringIO.new
-    $stderr = StringIO.new
-    IdentityProvider::set :port => IDP_PORT
-    IdentityProvider::run!
-  end
-
-  test_state.each_value { |pid| puts pid }
-  return test_state
-end
-
-def stop_servers test_state
-  test_state.each_value do |pid|
-    Process::kill :INT, pid
-  end
-end
-
-test_state = nil
-
-Given /^Running SPs and IdPs$/ do
-  test_state = spawn_servers
-  #stop_servers test_state
-end
-
-Then /^the SPs and IdPs will shut down$/ do
-  stop_servers test_state
+Given /^a running SP and IdP$/ do
+  sp_uri = URI::parse SP_URL
+  idp_uri = URI::parse IDP_URL
+  sp_response = Net::HTTP::get_response sp_uri
+  idp_response = Net::HTTP::get_response idp_uri
+  (sp_response.code == '302' || sp_response.code == '303').should eq true
+  idp_response.code.should eq '200'
 end
 
 When /^a user attempts to access a resource$/ do
-  pending # express the regexp above with the code you wish you had
+#  pending # express the regexp above with the code you wish you had
+  uri = URI::parse SP_URL
+  state[:initial_sp_response] = Net::HTTP::get_response uri
+  (state[:initial_sp_response].code == '303' || state[:initial_sp_response].code == '302').should eq true
 end
 
 When /^the user does not have an authentication context$/ do
-  pending # express the regexp above with the code you wish you had
+  # pending # express the regexp above with the code you wish you had
 end
 
-Then /^the SP will HTTP redirect the user agent to the IdP$/ do
-  pending # express the regexp above with the code you wish you had
+Then /^the SP will HTTP redirect the user agent to the IdP with a SAML request$/ do
+  forward_uri = URI::parse state[:initial_sp_response]['location']
+  state[:initial_idp_response] = Net::HTTP::get_response forward_uri
+  (state[:initial_idp_response].code == '303' || state[:initial_idp_response].code == '302').should eq true
 end
 
 Then /^the identification provider will query for some kind of credentials$/ do

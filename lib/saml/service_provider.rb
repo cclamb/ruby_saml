@@ -8,7 +8,7 @@ class ServiceProvider < Sinatra::Base
       'Location' => 'location info',
       'Pragma' => 'no-cache', 
       'Cache-Control' => 'no-cache, no-store'
-    redirect 'http://localhost:5678/identify', 303
+    redirect 'http://localhost:5679/identify', 303
   end
 
 end
