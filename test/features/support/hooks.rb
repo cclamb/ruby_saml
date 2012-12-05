@@ -9,15 +9,15 @@ def spawn_servers
   test_state = {:sp_pid => 0, :idp_pid => 0}
 
   test_state[:sp_pid] = fork do
-    $stdout = StringIO.new
-    $stderr = StringIO.new
+    #$stdout = StringIO.new
+    #$stderr = StringIO.new
     ServiceProvider::set :port => SP_PORT
     ServiceProvider::run!
   end
 
   test_state[:idp_pid] = fork do
-    $stdout = StringIO.new
-    $stderr = StringIO.new
+    #$stdout = StringIO.new
+    #$stderr = StringIO.new
     IdentityProvider::set :port => IDP_PORT
     IdentityProvider::run!
   end
