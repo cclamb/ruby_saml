@@ -16,4 +16,8 @@ class Saml
 
   end
 
+  def xml
+    
+  end
+
 end
